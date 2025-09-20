@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame Rate (FPS) Visualizer</title>
+    <!-- We now include the GSAP library from a CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        /* Basic styles for a clean, centered layout */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Main container for the application */
+        #app-container {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px; /* Increased width for the new layout */
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 2.5rem;
+            color: #666;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Controls section for the slider */
+        #controls {
+            margin-bottom: 2.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-note {
+            font-size: 0.9rem;
+            color: #888;
+            white-space: nowrap;
+        }
+
+        input[type="number"] {
+            width: 75px;
+            padding: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            text-align: center;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.07);
+        }
+
+        /* Hide the number input arrows for a cleaner look */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+          -webkit-appearance: none; 
+          margin: 0; 
+        }
+        input[type=number] {
+          -moz-appearance: textfield;
+        }
+
+        /* Styling the range slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 80%;
+            max-width: 400px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            outline: none;
+            transition: opacity .2s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #007aff;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #007aff;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Container for the animation canvases, now using CSS Grid */
+        #animation-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, auto);
+            gap: 20px;
+            justify-items: center;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .canvas-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Placing each item in the grid */
+        .canvas-wrapper.top-left { grid-column: 1; grid-row: 1; }
+        .canvas-wrapper.top-right { grid-column: 3; grid-row: 1; }
+        .canvas-wrapper.center { 
+            grid-column: 2; 
+            grid-row: 1 / span 2; /* Span across both rows to center vertically */
+            align-self: center;
+        }
+        .canvas-wrapper.bottom-left { grid-column: 1; grid-row: 2; }
+        .canvas-wrapper.bottom-right { grid-column: 3; grid-row: 2; }
+
+
+        canvas {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .fps-label {
+            margin-top: 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* --- Responsive Styles for Mobile --- */
+        @media (max-width: 768px) {
+            #app-container {
+                padding: 1.5rem;
+            }
+
+            #animation-container {
+                grid-template-columns: 1fr; /* Switch to a single column */
+                grid-template-rows: auto;    /* Let rows be determined by content */
+                gap: 30px; /* Increase gap for vertical stacking */
+            }
+
+            /* Reset all the specific grid placements */
+            .canvas-wrapper.top-left,
+            .canvas-wrapper.top-right,
+            .canvas-wrapper.center,
+            .canvas-wrapper.bottom-left,
+            .canvas-wrapper.bottom-right {
+                grid-column: auto;
+                grid-row: auto;
+            }
+
+            /* Optional: Re-order the center element to be on top for mobile */
+            .canvas-wrapper.center {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <h1>Frame Rate Visualizer</h1>
+        <p>This tool demonstrates how motion appears at different frame rates. Use the slider or the input box below to adjust the frame rate of the central animation. Compare its motion against the fixed examples surrounding it. You'll notice that at high FPS (like 120), the motion is smooth and clear. At low FPS (like 10), the motion becomes a jarring "stutter," making the object difficult to track.</p>
+
+        <!-- User controls for selecting FPS -->
+        <div id="controls">
+            <label for="fps-slider">Your Chosen FPS (Center)</label>
+            <div class="input-group">
+                <input type="range" id="fps-slider" min="1" max="120" value="10">
+                <input type="number" id="fps-input" min="1" max="120" value="10">
+                <span class="range-note">(1-120)</span>
+            </div>
+        </div>
+
+        <!-- Canvases for displaying animations -->
+        <div id="animation-container">
+            <div class="canvas-wrapper top-left">
+                <canvas id="canvas-24fps" width="200" height="200"></canvas>
+                <div class="fps-label">24 FPS</div>
+            </div>
+            <div class="canvas-wrapper top-right">
+                <canvas id="canvas-30fps" width="200" height="200"></canvas>
+                <div class="fps-label">30 FPS</div>
+            </div>
+            <div class="canvas-wrapper center">
+                <canvas id="canvas-user" width="200" height="200"></canvas>
+                <div class="fps-label">User: <span id="user-fps-label">10</span> FPS</div>
+            </div>
+            <div class="canvas-wrapper bottom-left">
+                <canvas id="canvas-60fps" width="200" height="200"></canvas>
+                <div class="fps-label">60 FPS</div>
+            </div>
+            <div class="canvas-wrapper bottom-right">
+                <canvas id="canvas-120fps" width="200" height="200"></canvas>
+                <div class="fps-label">120 FPS</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Element References ---
+            const fpsSlider = document.getElementById('fps-slider');
+            const fpsInput = document.getElementById('fps-input');
+            const userFpsLabel = document.getElementById('user-fps-label');
+
+            const canvasUser = document.getElementById('canvas-user');
+            const ctxUser = canvasUser.getContext('2d');
+            const canvas24 = document.getElementById('canvas-24fps');
+            const ctx24 = canvas24.getContext('2d');
+            const canvas30 = document.getElementById('canvas-30fps');
+            const ctx30 = canvas30.getContext('2d');
+            const canvas60 = document.getElementById('canvas-60fps');
+            const ctx60 = canvas60.getContext('2d');
+            const canvas120 = document.getElementById('canvas-120fps');
+            const ctx120 = canvas120.getContext('2d');
+            
+            // --- Animation State ---
+            const objectRadius = 20;
+            const startX = objectRadius + 10;
+            const endX = 200 - objectRadius - 10;
+
+            const masterState = { x: startX };
+
+            const textState = {
+                user: "10",
+                twentyFour: "24",
+                thirty: "30",
+                sixty: "60",
+                oneTwenty: "120"
+            };
+            
+            // --- GSAP Master Animation ---
+            gsap.to(masterState, {
+                x: endX,
+                duration: 1.5,
+                ease: "power1.inOut",
+                repeat: -1,
+                yoyo: true,
+            });
+
+            /**
+             * Renders a single frame of the moving object on a given canvas.
+             */
+            function renderCanvas(ctx, canvas, xPos, text) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const centerY = canvas.height / 2;
+                
+                ctx.beginPath();
+                ctx.arc(xPos, centerY, objectRadius, 0, Math.PI * 2);
+                ctx.fillStyle = '#007aff';
+                ctx.fill();
+                ctx.closePath();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, xPos, centerY);
+            }
+
+            // --- Controlled Rendering Loop ---
+            let userFps = 10;
+            const renderTimes = { user: 0, twentyFour: 0, thirty: 0, sixty: 0, oneTwenty: 0 };
+            const intervals = { 
+                twentyFour: 1000 / 24,
+                thirty: 1000 / 30,
+                sixty: 1000 / 60, 
+                oneTwenty: 1000 / 120 
+            };
+            let userInterval = 1000 / userFps;
+
+            gsap.ticker.add((time) => {
+                const currentTime = time * 1000;
+
+                if (currentTime - renderTimes.twentyFour >= intervals.twentyFour) {
+                    renderTimes.twentyFour = currentTime;
+                    renderCanvas(ctx24, canvas24, masterState.x, textState.twentyFour);
+                }
+                if (currentTime - renderTimes.thirty >= intervals.thirty) {
+                    renderTimes.thirty = currentTime;
+                    renderCanvas(ctx30, canvas30, masterState.x, textState.thirty);
+                }
+                if (currentTime - renderTimes.sixty >= intervals.sixty) {
+                    renderTimes.sixty = currentTime;
+                    renderCanvas(ctx60, canvas60, masterState.x, textState.sixty);
+                }
+                if (currentTime - renderTimes.oneTwenty >= intervals.oneTwenty) {
+                    renderTimes.oneTwenty = currentTime;
+                    renderCanvas(ctx120, canvas120, masterState.x, textState.oneTwenty);
+                }
+                if (currentTime - renderTimes.user >= userInterval) {
+                    renderTimes.user = currentTime;
+                    renderCanvas(ctxUser, canvasUser, masterState.x, textState.user);
+                }
+            });
+
+            // --- Event Listeners and UI Sync ---
+            function updateUserFps(newFps) {
+                const minFps = parseInt(fpsSlider.min, 10);
+                const maxFps = parseInt(fpsSlider.max, 10);
+                let value = parseInt(newFps, 10);
+
+                if (isNaN(value)) { value = minFps; }
+                value = Math.max(minFps, Math.min(value, maxFps));
+
+                fpsSlider.value = value;
+                fpsInput.value = value;
+                userFpsLabel.textContent = value;
+                
+                userFps = value;
+                userInterval = 1000 / userFps;
+                textState.user = value.toString();
+            }
+
+            fpsSlider.addEventListener('input', (e) => updateUserFps(e.target.value));
+            fpsInput.addEventListener('input', (e) => updateUserFps(e.target.value));
+            fpsInput.addEventListener('blur', (e) => {
+                if (e.target.value === '') {
+                    updateUserFps(fpsSlider.value);
+                }
+            });
+
+            // Initialize the UI on load.
+            updateUserFps(fpsSlider.value);
+        });
+    </script>
+</body>
+</html>
+
