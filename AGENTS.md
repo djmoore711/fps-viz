@@ -8,45 +8,44 @@
 - Name: **Frame Rate (FPS) Visualizer**
 - Purpose: Show side-by-side visual comparisons of object motions at varying frame rates (24, 30, 60, 120 FPS), plus an interactive control to adjust FPS in real time.
 - Stack / Tech:  
-  - HTML5 + CSS3 (Grid, Media Queries)  
+  - HTML5
+  - Pico.css (via CDN)
+  - Custom CSS3 for layout (Grid, Media Queries)
   - Vanilla JavaScript (ES6+)  
   - GSAP for animation ticker  
-- Layout & Responsiveness: Desktop shows five-box grid, mobile stacks in one column.
+- Layout & Responsiveness: Desktop shows five-box grid, mobile stacks in one column. UI is styled with Pico.css and supports light/dark themes.
 
 ---
 
 ## Useful / Golden Commands
 These are commands or tasks agents should run to verify correctness, style, etc.
 
-- Format code (if using a formatter): *no default—use consistent spacing, semicolons, indentation (2 or 4 spaces; follow existing).*
-- Lint checks: similar to formatting rules; flag unused variables, enforce strict mode.
-- Run animations manually (in browser) to check for smoothness and consistent behavior across FPS settings.
 - Open **index.html** in a modern browser to test locally.
+- Run animations manually (in browser) to check for smoothness and consistent behavior across FPS settings.
+- **Test the theme toggle** to ensure light/dark modes work and persist.
 - Validate responsiveness (e.g. via browser dev tools) to ensure layout stacks correctly on narrow viewports.
 
 ---
 
 ## File / Folder Structure
-- Root directory has `index.html`, plus related JS/CSS and assets.
-- CSS (styles) files—mostly custom, no framework.
-- JS logic in separate JS file(s), likely `app.js` or similar.
+- `index.html`: Contains all HTML, custom CSS in a `<style>` block, and the core animation script.
+- `script.js`: Contains the theme-switching logic.
 - GSAP import is used for the animation ticker.
 - No build system or bundler is assumed (unless added later).
 
 ---
 
 ## Coding Style & Conventions
-- Use **ES6+**: let/const, arrow functions, template strings.
-- Modular, small functions: separate logic where possible (e.g. FPS control logic separate from animation render).
-- Clear, descriptive variable/function names.
-- Avoid hardcoding values like colors or layout metrics unless necessary; reuse CSS variables if present.
-- Keep animation logic performant: avoid expensive DOM queries inside animation frames; use requestAnimationFrame or GSAP ticker properly.
+- **Leverage Pico.css:** Use Pico's default styles for elements wherever possible.
+- **Minimal Custom CSS:** Custom CSS in the `<style>` block should be for layout purposes (e.g., the canvas grid) that Pico doesn't handle, not for basic component styling.
+- **Use CSS Variables:** When overriding styles or in custom CSS, use Pico's CSS variables (e.g., `var(--primary)`) for consistency with the theme.
+- **Modular JavaScript:** Keep the theme-switching logic in `script.js` separate from the animation logic in `index.html`.
 
 ---
 
 ## Branching & PR Policy (for Codex + human agents)
 - **Never commit directly to `main`.**
-- For any new feature, bug fix, or change: create a new feature branch, name it `feature/<short-kebab-summary>` (e.g. `feature/change-fps-control-style`).
+- For any new feature, bug fix, or change: create a new feature branch, name it `feature/<short-kebab-summary>` (e.g., `feature/change-fps-control-style`).
 - In prompts to the agent: explicitly say work on the feature branch, do not modify `main`.
 - After the change is complete, open a Pull Request from that feature branch → `main`.
 - PR should include:
@@ -57,11 +56,12 @@ These are commands or tasks agents should run to verify correctness, style, etc.
 ---
 
 ## Validation & Testing Requirements
-- Visual test: compare animations at baseline FPS (e.g. 24, 30, 60, 120) and ensure they move at same speed, smoothness differences are clear.
-- Responsiveness test: mobile vs desktop. Layout should adapt (grid → stack).
-- Manual interaction test: slider / number input to control central animation FPS.
-- Cross-browser check: at least in Chrome and Firefox; check that timing (GSAP ticker) behaves consistently.
-- CSS/JS linting: no errors; syntax clean.
+- **Visual Test:** Compare animations at baseline FPS. Verify that both light and dark themes render correctly and that colors update as expected.
+- **Responsiveness Test:** Mobile vs desktop. Layout should adapt (grid → stack).
+- **Functional Test:**
+  - The FPS slider and input should work correctly.
+  - The theme toggle buttons must switch themes and persist the choice in `localStorage`.
+- **Cross-browser check:** At least in Chrome and Firefox.
 
 ---
 

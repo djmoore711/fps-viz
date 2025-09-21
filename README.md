@@ -17,13 +17,15 @@ The core principle of this visualizer is that all animated objects travel at the
 * **Five-Way Comparison:** Simultaneously view animations running at 24 FPS (cinema standard), 30 FPS (early video), 60 FPS (modern video), and 120 FPS (high-performance gaming), alongside a user-controlled animation.
 * **Interactive Controls:** Use the intuitive slider or the precise number input to adjust the frame rate of the central animation from 1 to 120 FPS in real-time.
 * **Responsive Design:** The layout intelligently adapts to any screen size. It uses a "dice-five" grid on desktops for easy comparison and automatically stacks into a clean, single column on mobile devices.
+* **Light & Dark Mode:** Includes a theme toggle to switch between light and dark modes, with the user's preference saved locally.
 * **Accurate Simulation:** Powered by the GSAP (GreenSock Animation Platform) ticker for precise timing, ensuring the demonstration is as accurate as the browser and hardware will allow.
 
 ## Technologies Used
 
 * **HTML5:** For the core structure of the application.
-* **CSS3:** For modern styling, including CSS Grid for the layout and Media Queries for responsiveness.
-* **Vanilla JavaScript (ES6+):** For all the user interaction logic and DOM manipulation.
+* **Pico.css:** As the core CSS framework for modern, theme-able styling of components.
+* **CSS3:** For custom layout styles (like the 5-box grid) and media queries.
+* **Vanilla JavaScript (ES6+):** For all the user interaction logic, including the new theme switcher.
 * **GSAP (GreenSock Animation Platform):** For the high-performance animation ticker that drives the simulation, ensuring timing is precise and reliable across different devices and refresh rates.
 
 ## How To Use
