@@ -4,7 +4,7 @@
 
 A clean, interactive, and responsive web application designed to visually demonstrate the difference in motion smoothness at various frame rates. This tool provides a clear, side-by-side comparison to help users intuitively understand the impact of FPS on perceived motion.
 
-### [**View**](https://djmoore711.github.io/fps-viz/) the Live Demo Here
+### [**Vie the Live Demo Herew**](https://djmoore711.github.io/fps-viz/)
 
 ## About The Project
 
